@@ -9,7 +9,9 @@ module.exports.getLoginPage = (req, res) => {
   res.sendFile(path.join(__dirname, "../views/login.html"));
 };
 module.exports.getVcodeImg = (req, res) => {
-  let p = new captchapng(80, 30, parseInt(Math.random() * 9000 + 1000)); // width,height,numeric captcha
+  const random = parseInt(Math.random() * 9000 + 1000);
+  req.session.vcode = random;
+  let p = new captchapng(80, 30, random); // width,height,numeric captcha
   p.color(0, 0, 0, 0); // First color: background (red, green, blue, alpha)
   p.color(80, 80, 80, 255); // Second color: paint (red, green, blue, alpha)
 
@@ -48,6 +50,36 @@ module.exports.Register = (req, res) => {
               res.json(messageData);
             }
           });
+        }
+      });
+    }
+  );
+};
+module.exports.getstudentManagerPage = (req, res) => {
+  let { userName, password, vcode } = req.body;
+  let result = { status: 0, message: "登录成功" };
+  if (vcode != req.session.vcode) {
+    result.status = 1;
+    result.message = "验证码错误";
+    res.json(result);
+    return;
+  }
+  MongoClient.connect(
+    url,
+    { useNewUrlParser: true },
+    function(err, client) {
+      const db = client.db(dbName);
+      const collection = db.collection("userInfo");
+      // Find some documents
+      collection.findOne({ userName, password }, function(err, doc) {
+        if (doc) {
+          res.json(result);
+          client.close();
+        } else {
+          result.status = 2;
+          result.message = "用户或者验证码错误";
+          res.json(result);
+          client.close();
         }
       });
     }

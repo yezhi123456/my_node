@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
     <script src="/js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="/js/md5.js"></script>
     <title>登录页面</title>
 </head>
 
@@ -39,11 +40,11 @@
                                 <img id="vcodeimg" src="/account/vcodeImg">
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group">    
                             <div class="col-sm-offset-2 col-sm-10">
                                 <!-- submit有一个默认的提交行为，不要加上 -->
                                 <!-- <button type="submit" onclick="login()"  class="btn btn-default">登录</button> -->
-                                <button onclick="login()" class="btn btn-default">登录</button>
+                                <button onclick="login()" type="button" class="btn btn-default">登录</button>
                                 &nbsp;&nbsp;
                                 <input onclick="register();" type="button" value="注册" class="btn btn-danger">
                             </div>
@@ -60,6 +61,19 @@
     })
     function register() {
         location.href = "/account/register";
+    }
+    function login() {
+        let password = $.md5($("#passwordId").val() + "YZ");
+        let userName = $("#usernameId").val();
+        let vcode = $('#vcodeId').val();
+        $.post("/account/studentManager", { userName, password, vcode }, function (data) {
+            if (data.status == 0) {
+                location.href = "/studentManager/list";
+            } else {
+                alert(data.message);
+                $("#vcodeimg").attr("src", "/account/vcodeImg?random=" + Math.random());
+            }
+        })
     }
 </script>
 

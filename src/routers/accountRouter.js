@@ -9,4 +9,5 @@ router.get("/login", accountRouter.getLoginPage);
 router.get("/vcodeImg", accountRouter.getVcodeImg);
 router.get("/register", accountRouter.getRegister);
 router.post("/register", accountRouter.Register);
+router.post("/studentManager", accountRouter.getstudentManagerPage);
 module.exports = router;
