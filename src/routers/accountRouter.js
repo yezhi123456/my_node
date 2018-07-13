@@ -7,4 +7,6 @@ const accountRouter = require(path.join(
 ));
 router.get("/login", accountRouter.getLoginPage);
 router.get("/vcodeImg", accountRouter.getVcodeImg);
+router.get("/register", accountRouter.getRegister);
+router.post("/register", accountRouter.Register);
 module.exports = router;
