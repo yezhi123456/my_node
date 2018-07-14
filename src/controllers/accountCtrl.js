@@ -1,10 +1,7 @@
 const path = require("path");
 const http = require("http");
 const captchapng = require("captchapng");
-const MongoClient = require("mongodb").MongoClient;
-const url = "mongodb://localhost:27017";
-const dbName = "myfirstDatabase";
-
+const dbtool = require(path.join(__dirname, "../tools/dbtool"));
 module.exports.getLoginPage = (req, res) => {
   res.sendFile(path.join(__dirname, "../views/login.html"));
 };
@@ -28,32 +25,21 @@ module.exports.getRegister = (req, res) => {
 module.exports.Register = (req, res) => {
   let { userName } = req.body;
   let messageData = { status: 0, message: "注册成功" };
-  MongoClient.connect(
-    url,
-    { useNewUrlParser: true },
-    function(err, client) {
-      const db = client.db(dbName);
-      const collection = db.collection("userInfo");
-      collection.findOne({ userName }, function(err, docs) {
-        if (docs != null) {
-          messageData = { status: 1, message: "账号存在" };
-          client.close();
+  dbtool.findOne("userInfo", { userName }, (err, docs) => {
+    if (docs != null) {
+      messageData = { status: 1, message: "账号存在" };
+      res.json(messageData);
+    } else {
+      dbtool.insertOne("userInfo", req.body, (err, result) => {
+        if (result != null) {
           res.json(messageData);
         } else {
-          collection.insertOne(req.body, function(err, result) {
-            if (result != null) {
-              client.close();
-              res.json(messageData);
-            } else {
-              messageData = { status: 2, message: "注册失败" };
-              client.close();
-              res.json(messageData);
-            }
-          });
+          messageData = { status: 2, message: "注册失败" };
+          res.json(messageData);
         }
       });
     }
-  );
+  });
 };
 module.exports.getstudentManagerPage = (req, res) => {
   let { userName, password, vcode } = req.body;
@@ -64,24 +50,13 @@ module.exports.getstudentManagerPage = (req, res) => {
     res.json(result);
     return;
   }
-  MongoClient.connect(
-    url,
-    { useNewUrlParser: true },
-    function(err, client) {
-      const db = client.db(dbName);
-      const collection = db.collection("userInfo");
-      // Find some documents
-      collection.findOne({ userName, password }, function(err, doc) {
-        if (doc) {
-          res.json(result);
-          client.close();
-        } else {
-          result.status = 2;
-          result.message = "用户或者验证码错误";
-          res.json(result);
-          client.close();
-        }
-      });
+  dbtool.findOne("userInfo", { userName, password }, (err, doc) => {
+    if (doc) {
+      res.json(result);
+    } else {
+      result.status = 2;
+      result.message = "用户或者验证码错误";
+      res.json(result);
     }
-  );
+  });
 };
