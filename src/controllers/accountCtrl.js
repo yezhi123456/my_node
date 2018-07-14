@@ -52,6 +52,7 @@ module.exports.getstudentManagerPage = (req, res) => {
   }
   dbtool.findOne("userInfo", { userName, password }, (err, doc) => {
     if (doc) {
+      req.session.loginName = doc.userName;
       res.json(result);
     } else {
       result.status = 2;

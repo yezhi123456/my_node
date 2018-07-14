@@ -19,6 +19,17 @@ const studentManagerRouter = require(path.join(
   __dirname,
   "./routers/studentManagerRouter"
 ));
+app.all("*", (req, res, next) => {
+  if (req.url.includes("/account")) {
+    next();
+  } else {
+    if (!req.session.loginName) {
+      res.send('<script>window.location.href = "/account/login";</script>');
+      return;
+    }
+    next();
+  }
+});
 app.use("/account", accountRouter);
 app.use("/studentManager", studentManagerRouter);
 app.listen(80, "127.0.0.1", err => {
